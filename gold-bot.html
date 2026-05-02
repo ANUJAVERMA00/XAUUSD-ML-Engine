@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ENALYSIS · Gold ML Engine</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#f0f2f5;font-family:'Courier New',monospace;padding:10px;font-size:12px}
+.container{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:10px}
+.card{background:#fff;border:1px solid #d0d5dd;border-radius:4px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.header{background:#c8102e;color:#fff;padding:8px 12px;margin:-12px -12px 12px;font-weight:700;font-size:12px;border-radius:4px 4px 0 0;display:flex;justify-content:space-between;align-items:center}
+.header-sub{font-size:9px;opacity:.8;font-weight:400}
+.row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #e5e7eb;font-size:11px;color:#1a1a2e}
+.row:last-child{border-bottom:none}
+.val{font-weight:700;color:#059669;font-family:'Courier New',monospace}
+.val.r{color:#dc2626}.val.g{color:#059669}.val.o{color:#d97706}.val.b{color:#1d4ed8}.val.gold{color:#b45309}
+.signal-box{font-size:22px;font-weight:700;text-align:center;padding:12px 10px;margin:10px 0;border-radius:4px;letter-spacing:1px}
+.sig-buy{background:#d1fae5;color:#059669;border:2px solid #059669}
+.sig-sell{background:#fee2e2;color:#dc2626;border:2px solid #dc2626}
+.sig-neutral{background:#fef3c7;color:#d97706;border:2px solid #d97706}
+button{background:#c8102e;color:#fff;border:none;padding:8px;width:100%;cursor:pointer;font-family:'Courier New',monospace;font-weight:700;margin:5px 0;border-radius:4px;font-size:12px;transition:background .15s}
+button:hover{background:#a50e25}
+button:active{transform:scale(.98)}
+button:disabled{background:#9ca3af;cursor:not-allowed}
+.btn-sm{padding:4px 8px;width:auto;margin:2px;font-size:10px}
+.btn-tf{background:#e5e7eb;color:#374151;padding:4px 8px;width:auto;margin:2px;font-size:10px}
+.btn-tf.on{background:#c8102e;color:#fff}
+.zone{background:#f9fafb;padding:5px 8px;margin:3px 0;font-size:10px;display:flex;justify-content:space-between;align-items:center;border-radius:3px;border-left:3px solid #d0d5dd}
+.zone.res{border-left-color:#dc2626}.zone.sup{border-left-color:#059669}.zone.liq{border-left-color:#1d4ed8}.zone.ml{border-left-color:#7c3aed}
+.progress{height:4px;background:#e5e7eb;margin-top:3px;border-radius:3px}
+.pf{height:100%;border-radius:3px;transition:width .4s}
+.badge{background:#f3f4f6;color:#374151;padding:2px 5px;border-radius:2px;font-size:9px;display:inline-block;margin:2px;border:1px solid #d0d5dd}
+.badge.active{background:#dcfce7;color:#166534;border-color:#059669}
+.badge.training{background:#fef3c7;color:#92400e;border-color:#d97706}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.metric-card{background:#f9fafb;border:1px solid #e5e7eb;border-radius:3px;padding:8px;text-align:center}
+.metric-val{font-size:20px;font-weight:700;font-family:'Courier New',monospace}
+.metric-lbl{font-size:9px;color:#6b7280;margin-top:2px;text-transform:uppercase;letter-spacing:.05em}
+.algo-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid #f3f4f6;font-size:10px}
+.algo-name{color:#374151;font-weight:700}
+.algo-val{font-family:'Courier New',monospace;font-weight:700}
+.vote-bar{height:3px;background:#e5e7eb;border-radius:2px;margin-top:3px}
+.vote-fill{height:100%;border-radius:2px;transition:width .4s}
+canvas{display:block;width:100%;border-radius:3px}
+.log-entry{display:flex;gap:8px;padding:4px 0;font-size:10px;border-bottom:1px solid #f3f4f6;line-height:1.4}
+.log-time{color:#9ca3af;flex-shrink:0;width:75px}
+.log-tag{flex-shrink:0;width:52px;font-weight:700;text-transform:uppercase}
+.log-tag.TRADE{color:#b45309}.log-tag.SIGNAL{color:#7c3aed}.log-tag.ML{color:#1d4ed8}.log-tag.ERROR{color:#dc2626}.log-tag.INFO{color:#059669}.log-tag.RL{color:#d97706}
+.log-msg{flex:1;color:#374151;word-break:break-word}
+.tp-sl-box{display:flex;gap:6px;margin-top:6px}
+.tp-box,.sl-box{flex:1;padding:6px;border-radius:3px;text-align:center;font-size:10px;font-weight:700}
+.tp-box{background:#d1fae5;border:1px solid #059669;color:#059669}
+.sl-box{background:#fee2e2;border:1px solid #dc2626;color:#dc2626}
+.price-hero{text-align:center;padding:16px 0 10px}
+.ph-price{font-size:36px;font-weight:700;letter-spacing:-1px;font-family:'Courier New',monospace}
+.ph-tag{font-size:11px;font-weight:700;padding:3px 10px;border-radius:2px;display:inline-block;margin-top:5px}
+.ph-tag.g{background:#dcfce7;color:#059669}.ph-tag.r{background:#fee2e2;color:#dc2626}
+.ind-row{display:flex;gap:4px;flex-wrap:wrap;margin:6px 0}
+.ind{font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px}
+.ind.rsi{background:#ede9fe;color:#6d28d9}.ind.macd{background:#dbeafe;color:#1d4ed8}
+.ind.bb{background:#dcfce7;color:#166534}.ind.atr{background:#fef3c7;color:#92400e}
+.ind.ema{background:#fdf4e7;color:#b45309}.ind.kf{background:#f0fdf4;color:#14532d}
+.conf-bar{height:8px;background:#e5e7eb;border-radius:4px;overflow:hidden;margin-top:6px}
+.conf-fill{height:100%;border-radius:4px;transition:width .4s}
+.rl-state{display:flex;gap:4px;margin:6px 0;flex-wrap:wrap}
+.rl-chip{font-size:9px;padding:2px 6px;border-radius:2px;font-weight:700}
+.rl-chip.hold{background:#fef3c7;color:#92400e}
+.rl-chip.buy{background:#dcfce7;color:#166534}
+.rl-chip.sell{background:#fee2e2;color:#991b1b}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:4px}
+.dot-live{background:#059669;animation:pulse-dot 1.5s infinite}
+.dot-idle{background:#9ca3af}
+.dot-train{background:#d97706;animation:pulse-dot .8s infinite}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.3}}
+.section-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#9ca3af;margin:8px 0 4px}
+.wide{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+(()=>{
+'use strict';
+
+/* ──────────────────────── CONSTANTS ──────────────────────── */
+const API_KEY='ea4ac26fc88543439a694ab6ee21e31d';
+const SYMBOL='XAU/USD';
+const BASE='https://api.twelvedata.com';
+const WS_URL=`wss://ws.twelvedata.com/v1/quotes/price?apikey=${API_KEY}`;
+
+/* ──────────────────────── STATE ──────────────────────── */
+let S={
+  price:0,prevPrice:0,change24h:0,high24h:0,low24h:0,spread:0,
+  candles:[],tf:'1h',ready:false,loading:false,wsOk:false,
+  signal:{label:'NEUTRAL',conf:50,tp:0,sl:0,entry:0,rr:0},
+  indicators:{rsi:50,macd:0,macdSig:0,atr:0,bb:{upper:0,mid:0,lower:0},ema9:0,ema21:0,ema50:0,kfPrice:0,adx:0,stoch:0},
+  zones:[],sr:[],regime:'UNKNOWN',
+  ml:{rf:{label:'NEUTRAL',conf:50},gb:{label:'NEUTRAL',conf:50},kf:{label:'NEUTRAL',conf:50},rl:{label:'NEUTRAL',q:{}},ensemble:{label:'NEUTRAL',conf:50}},
+  algo:{accuracy:0,samples:0,trainMs:0,features:[],iterations:0},
+  rl:{qTable:{},epsilon:0.12,alpha:0.08,gamma:0.93,episodes:0,reward:0,state:''},
+  logs:[],perf:{trades:0,wins:0,pnl:0,dd:0},
+  lastUpdate:'',autoAnalyze:true
+};
+
+let ws=null,pollTimer=null,analyzeTimer=null;
+let rfModel=null,gbModel=null,kfState={x:0,p:1,q:0.001,r:0.1};
+const listeners=[];
+
+/* ──────────────────────── HELPERS ──────────────────────── */
+const fmt=(n,d=2)=>Number(n||0).toFixed(d);
+const fmtP=(n)=>n>=1000?'$'+Number(n).toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2}):'$'+fmt(n,2);
+const ts=()=>new Date().toLocaleTimeString('en',{hour12:false});
+const setState=p=>{Object.assign(S,p);render()};
+function addLog(tag,msg){S.logs=[{tag,msg,ts:ts()},...S.logs.slice(0,49)];render();}
+
+/* ──────────────────────── MATH PRIMITIVES ──────────────────────── */
+const mean=(a)=>a.reduce((s,v)=>s+v,0)/a.length;
+function rollingMean(arr,w){
+  const r=new Array(arr.length).fill(null);
+  let sum=0;
+  for(let i=0;i<arr.length;i++){
+    sum+=arr[i];
+    if(i>=w)sum-=arr[i-w];
+    if(i>=w-1)r[i]=sum/w;
+  }
+  return r;
+}
+function rollingStd(arr,w){
+  const mu=rollingMean(arr,w);
+  const r=new Array(arr.length).fill(null);
+  for(let i=w-1;i<arr.length;i++){
+    let sq=0;
+    for(let j=i-w+1;j<=i;j++)sq+=(arr[j]-mu[i])**2;
+    r[i]=Math.sqrt(sq/w);
+  }
+  return r;
+}
+function ema(arr,p){
+  const k=2/(p+1);
+  const r=new Array(arr.length).fill(null);
+  let e=arr[0];
+  for(let i=0;i<arr.length;i++){r[i]=e=i===0?arr[0]:arr[i]*k+e*(1-k);}
+  return r;
+}
+function rsi(closes,p=14){
+  if(closes.length<p+1)return 50;
+  let g=0,l=0;
+  for(let i=closes.length-p;i<closes.length;i++){
+    const d=closes[i]-closes[i-1];
+    if(d>0)g+=d;else l-=d;
+  }
+  const ag=g/p,al=l/p;
+  return al===0?100:100-100/(1+ag/al);
+}
+function macd(closes){
+  const e12=ema(closes,12),e26=ema(closes,26);
+  const line=closes.map((_,i)=>e12[i]!=null&&e26[i]!=null?e12[i]-e26[i]:0);
+  const sig=ema(line,9);
+  return{line,sig,hist:line.map((v,i)=>v-sig[i])};
+}
+function atr(candles,p=14){
+  const tr=candles.map((c,i)=>i===0?c.high-c.low:Math.max(c.high-c.low,Math.abs(c.high-candles[i-1].close),Math.abs(c.low-candles[i-1].close)));
+  return rollingMean(tr,p);
+}
+function bollinger(closes,p=20,m=2){
+  const mu=rollingMean(closes,p),sd=rollingStd(closes,p);
+  return closes.map((_,i)=>mu[i]!=null?{upper:mu[i]+m*sd[i],mid:mu[i],lower:mu[i]-m*sd[i]}:null);
+}
+function adx(candles,p=14){
+  if(candles.length<p+1)return 25;
+  const dmp=[],dmm=[],tr=[];
+  for(let i=1;i<candles.length;i++){
+    const up=candles[i].high-candles[i-1].high,down=candles[i-1].low-candles[i].low;
+    dmp.push(up>down&&up>0?up:0);
+    dmm.push(down>up&&down>0?down:0);
+    tr.push(Math.max(candles[i].high-candles[i].low,Math.abs(candles[i].high-candles[i-1].close),Math.abs(candles[i].low-candles[i-1].close)));
+  }
+  const atrv=mean(tr.slice(-p)),admp=mean(dmp.slice(-p)),admm=mean(dmm.slice(-p));
+  const pip=atrv?admp/atrv*100:0,pim=atrv?admm/atrv*100:0;
+  const dx=pip+pim?Math.abs(pip-pim)/(pip+pim)*100:0;
+  return dx;
+}
+function stochastic(candles,p=14){
+  if(candles.length<p)return 50;
+  const sl=candles.slice(-p);
+  const lo=Math.min(...sl.map(c=>c.low)),hi=Math.max(...sl.map(c=>c.high));
+  return hi===lo?50:(candles[candles.length-1].close-lo)/(hi-lo)*100;
+}
+
+/* ──────────────────────── KALMAN FILTER ──────────────────────── */
+// Unsupervised state estimation — smooths noisy price, detects trend
+function kalmanUpdate(price){
+  kfState.p+=kfState.q;
+  const k=kfState.p/(kfState.p+kfState.r);
+  kfState.x=kfState.x+(k*(price-kfState.x));
+  kfState.p=(1-k)*kfState.p;
+  return kfState.x;
+}
+function initKalman(price){kfState={x:price,p:1,q:0.001,r:0.1};}
+
+/* ──────────────────────── K-MEANS REGIME DETECTION ──────────────────────── */
+// Unsupervised — clusters vol+momentum regimes
+function kMeansRegimes(candles,k=4){
+  if(candles.length<k*3)return{regime:'UNKNOWN',clusters:[]};
+  const feats=candles.slice(-80).map(c=>[
+    (c.close-c.open)/c.open*100,
+    c.volume/(mean(candles.slice(-20).map(d=>d.volume))||1),
+    (c.high-c.low)/c.close*100
+  ]);
+  let cents=feats.slice(0,k).map(f=>[...f]);
+  for(let iter=0;iter<25;iter++){
+    const grps=Array.from({length:k},()=>[]);
+    feats.forEach(f=>{
+      let best=0,bd=Infinity;
+      cents.forEach((c,ci)=>{const d=Math.sqrt(f.reduce((s,v,i)=>(s+(v-c[i])**2),0));if(d<bd){bd=d;best=ci;}});
+      grps[best].push(f);
+    });
+    let moved=false;
+    grps.forEach((g,i)=>{
+      if(!g.length)return;
+      const nc=g[0].map((_,j)=>mean(g.map(f=>f[j])));
+      if(Math.abs(nc[0]-cents[i][0])>0.0001)moved=true;
+      cents[i]=nc;
+    });
+    if(!moved)break;
+  }
+  // Classify last bar
+  const last=feats[feats.length-1];
+  let best=0,bd=Infinity;
+  cents.forEach((c,i)=>{const d=Math.sqrt(last.reduce((s,v,j)=>(s+(v-c[j])**2),0));if(d<bd){bd=d;best=i;}});
+  const regimes=['TRENDING_UP','HIGH_VOLATILITY','RANGING','TRENDING_DOWN'];
+  const sorted=cents.map((c,i)=>({i,ret:c[0]})).sort((a,b)=>b.ret-a.ret);
+  const regMap={};
+  sorted.forEach((s,r)=>regMap[s.i]=regimes[r]);
+  return{regime:regMap[best]||'RANGING',clusters:cents};
+}
+
+/* ──────────────────────── RANDOM FOREST (SUPERVISED) ──────────────────────── */
+class DecisionTree{
+  constructor(maxDepth=5,minLeaf=4,nFeats=null){this.maxDepth=maxDepth;this.minLeaf=minLeaf;this.nFeats=nFeats;this.root=null;}
+  gini(y){
+    const n=y.length;if(!n)return 0;
+    const c={};y.forEach(v=>c[v]=(c[v]||0)+1);
+    let s=0;for(const k in c)s+=(c[k]/n)**2;
+    return 1-s;
+  }
+  majority(y){
+    const c={};y.forEach(v=>c[v]=(c[v]||0)+1);
+    return Object.entries(c).sort((a,b)=>b[1]-a[1])[0][0];
+  }
+  split(X,y,feat,thresh){
+    const lX=[],lY=[],rX=[],rY=[];
+    for(let i=0;i<X.length;i++){
+      if(X[i][feat]<=thresh){lX.push(X[i]);lY.push(y[i]);}
+      else{rX.push(X[i]);rY.push(y[i]);}
+    }
+    return{lX,lY,rX,rY};
+  }
+  bestSplit(X,y){
+    const nF=X[0].length;
+    const fIdxs=this.nFeats?[...Array(nF).keys()].sort(()=>Math.random()-.5).slice(0,this.nFeats):[...Array(nF).keys()];
+    let bg=-1,bf=0,bt=0;
+    for(const f of fIdxs){
+      const vals=[...new Set(X.map(r=>r[f]))].sort((a,b)=>a-b);
+      for(let vi=0;vi<vals.length-1;vi++){
+        const thresh=(vals[vi]+vals[vi+1])/2;
+        const{lY,rY}=this.split(X,y,f,thresh);
+        if(!lY.length||!rY.length)continue;
+        const gain=this.gini(y)-(lY.length/y.length*this.gini(lY)+rY.length/y.length*this.gini(rY));
+        if(gain>bg){bg=gain;bf=f;bt=thresh;}
+      }
+    }
+    return{feat:bf,thresh:bt,gain:bg};
+  }
+  buildNode(X,y,d){
+    if(d>=this.maxDepth||y.length<this.minLeaf||new Set(y).size===1)return{leaf:true,label:this.majority(y),n:y.length};
+    const{feat,thresh,gain}=this.bestSplit(X,y);
+    if(gain<=0)return{leaf:true,label:this.majority(y),n:y.length};
+    const{lX,lY,rX,rY}=this.split(X,y,feat,thresh);
+    return{leaf:false,feat,thresh,left:this.buildNode(lX,lY,d+1),right:this.buildNode(rX,rY,d+1)};
+  }
+  fit(X,y){this.root=this.buildNode(X,y,0);}
+  predictNode(n,x){return n.leaf?n.label:x[n.feat]<=n.thresh?this.predictNode(n.left,x):this.predictNode(n.right,x);}
+  predict(x){return this.root?this.predictNode(this.root,x):'NEUTRAL';}
+}
+
+class RandomForest{
+  constructor(nTrees=20,maxDepth=5,minLeaf=4){this.nTrees=nTrees;this.maxDepth=maxDepth;this.minLeaf=minLeaf;this.trees=[];}
+  fit(X,y){
+    this.trees=[];
+    const nF=Math.max(1,Math.floor(Math.sqrt(X[0].length)));
+    for(let t=0;t<this.nTrees;t++){
+      const n=X.length;
+      const sX=[],sY=[];
+      for(let i=0;i<n;i++){const idx=Math.floor(Math.random()*n);sX.push(X[idx]);sY.push(y[idx]);}
+      const tree=new DecisionTree(this.maxDepth,this.minLeaf,nF);
+      tree.fit(sX,sY);
+      this.trees.push(tree);
+    }
+  }
+  predict(x){
+    const votes={};
+    this.trees.forEach(t=>{const l=t.predict(x);votes[l]=(votes[l]||0)+1;});
+    const best=Object.entries(votes).sort((a,b)=>b[1]-a[1])[0];
+    return{label:best[0],conf:best[1]/this.trees.length*100,votes};
+  }
+  featureImportance(X,y,names){
+    // Permutation importance proxy
+    const base=X.filter((_,i)=>this.predict(X[i]).label===y[i]).length/X.length;
+    return names.map((name,fi)=>{
+      const shuffled=[...X].map(r=>[...r]);
+      const col=shuffled.map(r=>r[fi]).sort(()=>Math.random()-.5);
+      shuffled.forEach((r,i)=>r[fi]=col[i]);
+      const acc=shuffled.filter((r,i)=>this.predict(r).label===y[i]).length/shuffled.length;
+      return{name,imp:Math.max(0,(base-acc)*100)};
+    }).sort((a,b)=>b.imp-a.imp);
+  }
+}
+
+/* ──────────────────────── GRADIENT BOOSTING (SUPERVISED) ──────────────────────── */
+// Simplified SAMME (AdaBoost multi-class) for fast inference
+class GradientBoosting{
+  constructor(nEstimators=12,maxDepth=3){this.n=nEstimators;this.maxDepth=maxDepth;this.learners=[];this.alphas=[];this.classes=['BUY','SELL','NEUTRAL'];}
+  fit(X,y){
+    this.learners=[];this.alphas=[];
+    const n=X.length;
+    const K=this.classes.length;
+    let w=new Array(n).fill(1/n);
+    for(let b=0;b<this.n;b++){
+      const sX=[],sY=[],sw=[];
+      // weighted bootstrap
+      const cumW=[]; let cs=0;
+      w.forEach(wi=>{cs+=wi;cumW.push(cs);});
+      for(let i=0;i<n;i++){
+        const r=Math.random()*cs;
+        let idx=cumW.findIndex(v=>v>=r);
+        if(idx<0)idx=n-1;
+        sX.push(X[idx]);sY.push(y[idx]);
+      }
+      const tree=new DecisionTree(this.maxDepth,3,null);
+      tree.fit(sX,sY);
+      let err=0;
+      const preds=X.map(x=>tree.predict(x));
+      for(let i=0;i<n;i++)if(preds[i]!==y[i])err+=w[i];
+      err=Math.max(err,1e-10);
+      if(err>=1-1/K)break;
+      const alpha=Math.log((1-err)/err)+Math.log(K-1);
+      this.learners.push(tree);this.alphas.push(alpha);
+      // update weights
+      for(let i=0;i<n;i++)w[i]*=preds[i]!==y[i]?Math.exp(alpha):1;
+      const ws=w.reduce((s,v)=>s+v,0);
+      for(let i=0;i<n;i++)w[i]/=ws;
+    }
+  }
+  predict(x){
+    const scores={BUY:0,SELL:0,NEUTRAL:0};
+    this.learners.forEach((t,i)=>{const l=t.predict(x);scores[l]+=this.alphas[i];});
+    const best=Object.entries(scores).sort((a,b)=>b[1]-a[1])[0];
+    const total=Object.values(scores).reduce((s,v)=>s+Math.exp(v),0);
+    return{label:best[0],conf:Math.exp(best[1])/total*100};
+  }
+}
+
+/* ──────────────────────── Q-LEARNING (REINFORCEMENT LEARNING) ──────────────────────── */
+// Encodes market state → discretizes → maintains Q-table → exploits best action
+const QL={
+  discretize(rsiV,macdV,bbPos,regime){
+    const r=rsiV<35?'OS':rsiV>65?'OB':'N';
+    const m=macdV>0.1?'UP':macdV<-0.1?'DN':'N';
+    const b=bbPos<0.2?'LOW':bbPos>0.8?'HIGH':'MID';
+    const reg=regime?regime.split('_')[0].charAt(0):'U';
+    return`${r}-${m}-${b}-${reg}`;
+  },
+  getQ(state,action){return(S.rl.qTable[state]||{})[action]||0;},
+  bestAction(state){
+    const actions=['BUY','SELL','NEUTRAL'];
+    let best=actions[0],bq=-Infinity;
+    actions.forEach(a=>{const q=QL.getQ(state,a);if(q>bq){bq=q;best=a;}});
+    return{action:best,q:bq};
+  },
+  // Simulate training: run episodes over historical candles
+  train(candles){
+    if(candles.length<30)return;
+    const closes=candles.map(c=>c.close);
+    const rsiArr=closes.map((_,i)=>i<15?50:rsi(closes.slice(0,i+1),14));
+    const macdArr=macd(closes);
+    const bbArr=bollinger(closes,20,2);
+    let totalR=0,eps=S.rl.episodes;
+
+    for(let i=20;i<candles.length-5;i++){
+      const bb=bbArr[i]||{upper:closes[i],lower:closes[i]};
+      const bbRange=bb.upper-bb.lower||1;
+      const bbPos=(closes[i]-bb.lower)/bbRange;
+      const state=QL.discretize(rsiArr[i],macdArr.hist[i]||0,bbPos,S.regime);
+      const{action}=QL.bestAction(state);
+      // Reward: next 3 bars direction
+      const futRet=(closes[Math.min(i+3,closes.length-1)]-closes[i])/closes[i]*100;
+      let reward=0;
+      if(action==='BUY')reward=futRet>0.08?2:futRet<-0.08?-2:0;
+      else if(action==='SELL')reward=futRet<-0.08?2:futRet>0.08?-2:0;
+      else reward=Math.abs(futRet)<0.05?0.5:0;
+      // Q-update
+      const nextBb=bbArr[i+1]||bb;
+      const nextBbPos=(closes[i+1]-(nextBb.lower||closes[i]))/((nextBb.upper-nextBb.lower)||1);
+      const nextState=QL.discretize(rsiArr[i+1]||50,macdArr.hist[i+1]||0,nextBbPos,S.regime);
+      const{q:maxNextQ}=QL.bestAction(nextState);
+      if(!S.rl.qTable[state])S.rl.qTable[state]={};
+      const oldQ=QL.getQ(state,action);
+      S.rl.qTable[state][action]=oldQ+S.rl.alpha*(reward+S.rl.gamma*maxNextQ-oldQ);
+      totalR+=reward;
+      eps++;
+    }
+    S.rl.episodes=eps;
+    S.rl.reward=totalR/(candles.length-25)||0;
+  },
+  infer(rsiV,macdV,bbPos,regime){
+    const state=QL.discretize(rsiV,macdV,bbPos,regime);
+    S.rl.state=state;
+    const{action,q}=QL.bestAction(state);
+    // Epsilon-greedy: still explore occasionally
+    const finalAction=Math.random()<S.rl.epsilon?(['BUY','SELL','NEUTRAL'][Math.floor(Math.random()*3)]):action;
+    return{label:finalAction,q:q.toFixed(3),state};
+  }
+};
+
+/* ──────────────────────── FEATURE ENGINEERING ──────────────────────── */
+const FEAT_NAMES=['RSI','MACD-Hist','BB-Position','EMA9-dist','EMA21-dist','ATR-norm','Momentum5','Body-Ratio','Stoch','Vol-Ratio','ADX-norm','HH-LL'];
+
+function buildDataset(candles){
+  if(candles.length<60)return{X:[],y:[]};
+  const closes=candles.map(c=>c.close),vols=candles.map(c=>c.volume);
+  const rsiArr=closes.map((_,i)=>i<15?50:rsi(closes.slice(0,i+1),14));
+  const macdData=macd(closes);
+  const bbArr=bollinger(closes,20,2);
+  const atrArr=atr(candles,14);
+  const ema9=ema(closes,9),ema21=ema(closes,21);
+  const vma20=rollingMean(vols,20);
+  const X=[],y=[];
+  for(let i=55;i<candles.length-6;i++){
+    const bb=bbArr[i];if(!bb)continue;
+    const bbRange=bb.upper-bb.lower||1;
+    const futRet=(closes[i+5]-closes[i])/closes[i]*100;
+    const label=futRet>0.12?'BUY':futRet<-0.12?'SELL':'NEUTRAL';
+    X.push([
+      rsiArr[i]/100,
+      (macdData.hist[i]||0)/closes[i],
+      (closes[i]-bb.lower)/bbRange,
+      (closes[i]-ema9[i])/closes[i],
+      (closes[i]-ema21[i])/closes[i],
+      (atrArr[i]||0)/closes[i],
+      (closes[i]-closes[i-5])/closes[i-5],
+      Math.abs(candles[i].close-candles[i].open)/(candles[i].high-candles[i].low||1),
+      stochastic(candles.slice(0,i+1),14)/100,
+      vols[i]/(vma20[i]||1),
+      adx(candles.slice(Math.max(0,i-20),i+1),14)/100,
+      (candles[i].high-candles[i].low)/(closes[i]||1)
+    ]);
+    y.push(label);
+  }
+  return{X,y};
+}
+
+/* ──────────────────────── ENSEMBLE + SIGNAL GENERATION ──────────────────────── */
+function computeSignal(candles){
+  const closes=candles.map(c=>c.close);
+  const last=closes[closes.length-1];
+  const candle=candles[candles.length-1];
+
+  // Indicators
+  const rsiVal=rsi(closes,14);
+  const macdData=macd(closes);
+  const mLine=macdData.line[macdData.line.length-1]||0;
+  const mHist=macdData.hist[macdData.hist.length-1]||0;
+  const mSig=macdData.sig[macdData.sig.length-1]||0;
+  const atrArr=atr(candles,14);
+  const atrVal=atrArr[atrArr.length-1]||0;
+  const bbArr=bollinger(closes,20,2);
+  const bb=bbArr[bbArr.length-1]||{upper:last,mid:last,lower:last};
+  const e9=ema(closes,9),e21=ema(closes,21),e50=ema(closes,50);
+  const ema9v=e9[e9.length-1],ema21v=e21[e21.length-1],ema50v=e50[e50.length-1];
+  const kfVal=kalmanUpdate(last);
+  const adxVal=adx(candles.slice(-30),14);
+  const stochVal=stochastic(candles,14);
+
+  S.indicators={rsi:rsiVal,macd:mLine,macdSig:mSig,macdHist:mHist,atr:atrVal,bb,ema9:ema9v,ema21:ema21v,ema50:ema50v,kfPrice:kfVal,adx:adxVal,stoch:stochVal};
+
+  // Regime (K-Means unsupervised)
+  const{regime}=kMeansRegimes(candles,4);
+  S.regime=regime;
+
+  // Build feature vector for current bar
+  const bbRange=bb.upper-bb.lower||1;
+  const vols=candles.map(c=>c.volume);
+  const vma=rollingMean(vols,20);
+  const vRatio=vols[vols.length-1]/(vma[vma.length-1]||1);
+  const feat=[
+    rsiVal/100, mHist/last, (last-bb.lower)/bbRange,
+    (last-ema9v)/last, (last-ema21v)/last,
+    atrVal/last,
+    (last-closes[closes.length-6])/closes[closes.length-6],
+    Math.abs(candle.close-candle.open)/(candle.high-candle.low||1),
+    stochVal/100, vRatio,
+    adxVal/100,
+    (candle.high-candle.low)/last
+  ];
+
+  // RF prediction
+  const rfPred=rfModel?rfModel.predict(feat):{label:'NEUTRAL',conf:50};
+
+  // GB prediction
+  const gbPred=gbModel?gbModel.predict(feat):{label:'NEUTRAL',conf:50};
+
+  // Kalman signal
+  const kfDiff=(last-kfVal)/kfVal*100;
+  const kfLabel=kfDiff>0.08?'BUY':kfDiff<-0.08?'SELL':'NEUTRAL';
+  const kfConf=Math.min(95,50+Math.abs(kfDiff)*30);
+
+  // RL inference
+  const bbPos=(last-bb.lower)/bbRange;
+  const rlRes=QL.infer(rsiVal,mHist,bbPos,regime);
+
+  S.ml={
+    rf:{label:rfPred.label,conf:rfPred.conf||50},
+    gb:{label:gbPred.label,conf:gbPred.conf||50},
+    kf:{label:kfLabel,conf:kfConf},
+    rl:{label:rlRes.label,q:rlRes.q,state:rlRes.state},
+    ensemble:{label:'NEUTRAL',conf:50}
+  };
+
+  // Weighted ensemble vote (RF=30, GB=25, KF=20, RL=15, rule-based=10)
+  const WEIGHTS={rf:0.30,gb:0.25,kf:0.20,rl:0.15,rule:0.10};
+  const votes={BUY:0,SELL:0,NEUTRAL:0};
+
+  [[rfPred.label,WEIGHTS.rf],[gbPred.label,WEIGHTS.gb],[kfLabel,WEIGHTS.kf],[rlRes.label,WEIGHTS.rl]].forEach(([l,w])=>{
+    votes[l]=(votes[l]||0)+w*(l==='NEUTRAL'?0.7:1);
+  });
+
+  // Rule-based layer (classic technical)
+  let ruleSig='NEUTRAL';
+  const bullCount=[ema9v>ema21v,ema21v>ema50v,rsiVal<65&&rsiVal>40,mHist>0,last>bb.mid,stochVal<80].filter(Boolean).length;
+  const bearCount=[ema9v<ema21v,ema21v<ema50v,rsiVal>35&&rsiVal<60,mHist<0,last<bb.mid,stochVal>20].filter(Boolean).length;
+  if(bullCount>=4&&rsiVal<70)ruleSig='BUY';
+  else if(bearCount>=4&&rsiVal>30)ruleSig='SELL';
+  votes[ruleSig]=(votes[ruleSig]||0)+WEIGHTS.rule;
+
+  const ensLabel=Object.entries(votes).sort((a,b)=>b[1]-a[1])[0][0];
+  const totalV=Object.values(votes).reduce((s,v)=>s+v,0);
+  const ensConf=(votes[ensLabel]/totalV)*100;
+
+  // Compute TP/SL based on ATR + regime
+  const atrMult=regime.includes('TRENDING')?1.8:1.3;
+  const riskMult=regime.includes('VOLATIL')?0.8:1.0;
+  let tp=0,sl=0;
+  if(ensLabel==='BUY'){tp=last+atrVal*atrMult;sl=last-atrVal*riskMult;}
+  else if(ensLabel==='SELL'){tp=last-atrVal*atrMult;sl=last+atrVal*riskMult;}
+  else{tp=last+atrVal;sl=last-atrVal;}
+  const rr=Math.abs(tp-last)/Math.abs(sl-last)||1;
+
+  S.ml.ensemble={label:ensLabel,conf:ensConf,votes};
+  S.signal={label:ensLabel,conf:ensConf,entry:last,tp,sl,rr,votes};
+}
+
+/* ──────────────────────── TRAIN ML MODELS ──────────────────────── */
+async function trainModels(candles){
+  const t0=performance.now();
+  addLog('ML','Building features...');
+  const{X,y}=buildDataset(candles);
+  if(X.length<30){addLog('ERROR','Not enough data for training');return;}
+
+  // Stratified split 80/20
+  const perm=[...Array(X.length).keys()].sort(()=>Math.random()-.5);
+  const cut=Math.floor(X.length*0.8);
+  const tIdx=perm.slice(0,cut),vIdx=perm.slice(cut);
+  const tX=tIdx.map(i=>X[i]),tY=tIdx.map(i=>y[i]);
+  const vX=vIdx.map(i=>X[i]),vY=vIdx.map(i=>y[i]);
+
+  addLog('ML',`Training RF (${tX.length} samples)...`);
+  rfModel=new RandomForest(20,5,4);
+  rfModel.fit(tX,tY);
+
+  addLog('ML','Training GradientBoosting...');
+  gbModel=new GradientBoosting(12,3);
+  gbModel.fit(tX,tY);
+
+  addLog('ML','Running RL Q-learning episodes...');
+  QL.train(candles);
+
+  // Validation accuracy
+  let rfOk=0,gbOk=0;
+  vX.forEach((x,i)=>{
+    if(rfModel.predict(x).label===vY[i])rfOk++;
+    if(gbModel.predict(x).label===vY[i])gbOk++;
+  });
+  const rfAcc=rfOk/vX.length*100;
+  const gbAcc=gbOk/vX.length*100;
+  const ms=performance.now()-t0;
+
+  // Feature importance
+  const fimp=rfModel.featureImportance(vX.slice(0,30),vY.slice(0,30),FEAT_NAMES);
+
+  S.algo={accuracy:(rfAcc+gbAcc)/2,rfAcc,gbAcc,samples:X.length,trainMs:ms,features:fimp.slice(0,8),iterations:S.rl.episodes};
+  addLog('ML',`Training done — RF:${rfAcc.toFixed(0)}% GB:${gbAcc.toFixed(0)}% in ${ms.toFixed(0)}ms`);
+}
+
+/* ──────────────────────── S/R + LIQUIDITY ZONES ──────────────────────── */
+function findSR(candles){
+  const pivH=[],pivL=[];
+  for(let i=5;i<candles.length-5;i++){
+    let isH=true,isL=true;
+    for(let j=i-5;j<=i+5;j++){
+      if(j===i)continue;
+      if(candles[j].high>=candles[i].high)isH=false;
+      if(candles[j].low<=candles[i].low)isL=false;
+    }
+    if(isH)pivH.push(candles[i].high);
+    if(isL)pivL.push(candles[i].low);
+  }
+  function cluster(prices,t=0.004){
+    const s=[...prices].sort((a,b)=>a-b);
+    const cl=[];let g=[s[0]];
+    for(let i=1;i<s.length;i++){
+      if((s[i]-s[i-1])/s[i-1]<t)g.push(s[i]);
+      else{cl.push(g.reduce((a,b)=>a+b)/g.length);g=[s[i]];}
+    }
+    if(g.length)cl.push(g.reduce((a,b)=>a+b)/g.length);
+    return cl;
+  }
+  const sr=[];
+  cluster(pivH).forEach(p=>sr.push({type:'RESISTANCE',price:p}));
+  cluster(pivL).forEach(p=>sr.push({type:'SUPPORT',price:p}));
+
+  // Volume profile liquidity zones
+  const closes=candles.map(c=>c.close);
+  const lo=Math.min(...candles.map(c=>c.low)),hi=Math.max(...candles.map(c=>c.high));
+  const step=(hi-lo)/25;
+  const prof=Array(25).fill(0);
+  candles.forEach(c=>{const b=Math.min(Math.floor(((c.high+c.low+c.close)/3-lo)/step),24);prof[b]+=c.volume;});
+  const maxV=Math.max(...prof);
+  prof.forEach((v,i)=>{if(v/maxV>0.45)sr.push({type:'LIQUIDITY',price:lo+(i+0.5)*step,strength:v/maxV*100});});
+
+  S.zones=sr.filter(z=>z.type==='LIQUIDITY').sort((a,b)=>b.strength-a.strength).slice(0,8);
+  S.sr=sr.filter(z=>z.type!=='LIQUIDITY').sort((a,b)=>Math.abs(b.price-closes[closes.length-1])-Math.abs(a.price-closes[closes.length-1])).slice(0,8);
+}
+
+/* ──────────────────────── TWELVE DATA API ──────────────────────── */
+async function fetchCandles(tf='1h',limit=200){
+  try{
+    const tfMap={'1m':'1min','5m':'5min','15m':'15min','1h':'1h','4h':'4h','1d':'1day'};
+    const r=await fetch(`${BASE}/time_series?symbol=XAU/USD&interval=${tfMap[tf]||'1h'}&outputsize=${limit}&apikey=${API_KEY}`);
+    const d=await r.json();
+    if(d.status==='error'||!d.values)throw new Error(d.message||'API error');
+    return d.values.map(v=>({
+      time:new Date(v.datetime).getTime()/1000,
+      open:parseFloat(v.open),high:parseFloat(v.high),
+      low:parseFloat(v.low),close:parseFloat(v.close),
+      volume:parseFloat(v.volume)||1
+    })).reverse();
+  }catch(e){addLog('ERROR','Candles: '+e.message);return null;}
+}
+
+async function fetchTicker(){
+  try{
+    const r=await fetch(`${BASE}/price?symbol=XAU/USD&apikey=${API_KEY}`);
+    const d=await r.json();
+    if(d.price)return parseFloat(d.price);
+  }catch(e){}
+  return null;
+}
+
+async function fetchQuote(){
+  try{
+    const r=await fetch(`${BASE}/quote?symbol=XAU/USD&apikey=${API_KEY}`);
+    const d=await r.json();
+    if(d.close){
+      S.change24h=parseFloat(d.percent_change||0);
+      S.high24h=parseFloat(d.high||0);
+      S.low24h=parseFloat(d.low||0);
+    }
+  }catch(e){}
+}
+
+function startWebSocket(){
+  if(ws){try{ws.close();}catch(e){}}
+  try{
+    ws=new WebSocket(WS_URL);
+    ws.onopen=()=>{
+      ws.send(JSON.stringify({action:'subscribe',params:{symbols:'XAU/USD'}}));
+      S.wsOk=true;
+      addLog('INFO','WebSocket connected — live XAU/USD feed active');
+      render();
+    };
+    ws.onmessage=e=>{
+      try{
+        const d=JSON.parse(e.data);
+        if(d.price){
+          S.prevPrice=S.price;
+          S.price=parseFloat(d.price);
+          S.lastUpdate=ts();
+          // Update last candle
+          if(S.candles.length){
+            const lc=S.candles[S.candles.length-1];
+            lc.close=S.price;
+            if(S.price>lc.high)lc.high=S.price;
+            if(S.price<lc.low)lc.low=S.price;
+          }
+          render();
+        }
+      }catch(err){}
+    };
+    ws.onerror=()=>{S.wsOk=false;render();};
+    ws.onclose=()=>{S.wsOk=false;render();setTimeout(startWebSocket,8000);};
+  }catch(e){S.wsOk=false;}
+}
+
+/* ──────────────────────── MAIN PIPELINE ──────────────────────── */
+async function runAnalysis(){
+  if(S.loading)return;
+  setState({loading:true});
+  addLog('INFO',`Fetching XAU/USD ${S.tf} candles...`);
+
+  const candles=await fetchCandles(S.tf,200);
+  await fetchQuote();
+
+  if(!candles){
+    setState({loading:false});
+    addLog('ERROR','Could not fetch candle data');
+    return;
+  }
+
+  S.candles=candles;
+  S.price=candles[candles.length-1].close;
+  S.lastUpdate=ts();
+  if(kfState.x===0)initKalman(S.price);
+
+  addLog('INFO',`${candles.length} bars loaded — starting training pipeline`);
+  await new Promise(r=>setTimeout(r,10));
+
+  await trainModels(candles);
+  findSR(candles);
+  computeSignal(candles);
+
+  setState({loading:false,ready:true});
+  addLog('SIGNAL',`ENSEMBLE → ${S.signal.label} ${S.signal.conf.toFixed(0)}% conf | TP:${fmtP(S.signal.tp)} SL:${fmtP(S.signal.sl)} R:R ${S.signal.rr.toFixed(2)}`);
+
+  if(!S.wsOk)startWebSocket();
+}
+
+function setTf(tf){
+  S.tf=tf;
+  runAnalysis();
+}
+
+/* ──────────────────────── DRAW CHART ──────────────────────── */
+function drawChart(canvasId){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas||!S.candles.length)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth,H=canvas.offsetHeight||160;
+  canvas.width=W*devicePixelRatio;canvas.height=H*devicePixelRatio;
+  canvas.style.width=W+'px';canvas.style.height=H+'px';
+  ctx.scale(devicePixelRatio,devicePixelRatio);
+
+  const pad={t:8,r:58,b:22,l:4};
+  const cw=W-pad.l-pad.r,ch=H-pad.t-pad.b;
+  const bars=S.candles.slice(-60);
+  if(bars.length<2)return;
+
+  ctx.fillStyle='#fafafa';ctx.fillRect(0,0,W,H);
+
+  const hi=Math.max(...bars.map(c=>c.high)),lo=Math.min(...bars.map(c=>c.low));
+  const rng=hi-lo||1,pMin=lo-rng*.04,pMax=hi+rng*.04;
+  const toY=p=>pad.t+ch-((p-pMin)/(pMax-pMin))*ch;
+  const bW=Math.max(2,(cw/bars.length)-1);
+
+  // Grid
+  for(let i=0;i<=4;i++){
+    const y=pad.t+(ch/4)*i;
+    ctx.strokeStyle='#f0f0f0';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();
+    const pr=pMax-(pMax-pMin)*(i/4);
+    ctx.fillStyle='#9ca3af';ctx.font='8px monospace';ctx.textAlign='right';
+    ctx.fillText(pr.toFixed(2),W-2,y+3);
+  }
+
+  // EMA lines
+  const closes=bars.map(c=>c.close);
+  const e9=ema(closes,9),e21=ema(closes,21);
+  [[e9,'rgba(212,160,23,.9)'],[e21,'rgba(29,78,216,.7)']].forEach(([ea,col])=>{
+    ctx.strokeStyle=col;ctx.lineWidth=1.2;ctx.beginPath();let st=false;
+    bars.forEach((c,i)=>{if(!ea[i])return;const x=pad.l+(i+.5)*(cw/bars.length),y=toY(ea[i]);if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);});
+    ctx.stroke();
+  });
+
+  // Bollinger bands
+  const bbData=bollinger(closes,20,2);
+  ['upper','lower'].forEach(band=>{
+    ctx.strokeStyle='rgba(5,150,105,.35)';ctx.lineWidth=1;ctx.setLineDash([3,3]);ctx.beginPath();let st=false;
+    bars.forEach((c,i)=>{const b=bbData[i];if(!b)return;const x=pad.l+(i+.5)*(cw/bars.length),y=toY(b[band]);if(!st){ctx.moveTo(x,y);st=true;}else ctx.lineTo(x,y);});
+    ctx.stroke();ctx.setLineDash([]);
+  });
+
+  // Candles
+  bars.forEach((c,i)=>{
+    const x=pad.l+(i+.5)*(cw/bars.length),up=c.close>=c.open,col=up?'#059669':'#dc2626';
+    const bTop=toY(Math.max(c.open,c.close)),bBot=toY(Math.min(c.open,c.close)),bH=Math.max(1,bBot-bTop);
+    ctx.fillStyle=col;ctx.fillRect(x-bW/2,bTop,bW,bH);
+    ctx.strokeStyle=col;ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x,toY(c.high));ctx.lineTo(x,bTop);ctx.moveTo(x,bBot);ctx.lineTo(x,toY(c.low));ctx.stroke();
+  });
+
+  // Current price line
+  if(S.price){
+    const y=toY(S.price);
+    ctx.strokeStyle='#b45309';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#b45309';ctx.fillRect(W-pad.r+1,y-8,pad.r-2,16);
+    ctx.fillStyle='#fff';ctx.font='bold 8px monospace';ctx.textAlign='center';
+    ctx.fillText(S.price.toFixed(2),W-pad.r/2,y+3);
+  }
+
+  // X labels
+  ctx.fillStyle='#9ca3af';ctx.font='8px monospace';ctx.textAlign='center';
+  [0,Math.floor(bars.length/3),Math.floor(bars.length*2/3),bars.length-1].forEach(i=>{
+    if(!bars[i])return;
+    const x=pad.l+(i+.5)*(cw/bars.length),d=new Date(bars[i].time*1000);
+    ctx.fillText(d.getHours().toString().padStart(2,'0')+':'+d.getMinutes().toString().padStart(2,'0'),x,H-5);
+  });
+}
+
+/* ──────────────────────── RENDER ──────────────────────── */
+function render(){
+  const root=document.getElementById('app');
+  if(!root)return;
+  const p=S.price,up=p>=S.prevPrice;
+  const sig=S.signal,ind=S.indicators,ml=S.ml,algo=S.algo;
+  const sigClass=sig.label==='BUY'?'sig-buy':sig.label==='SELL'?'sig-sell':'sig-neutral';
+
+  root.innerHTML=`
+<div class="container">
+
+<!-- CARD 1: PRICE + CONTROLS -->
+<div class="card">
+  <div class="header">XAU/USD · GOLD LIVE <span class="header-sub"><span class="status-dot ${S.wsOk?'dot-live':'dot-idle'}"></span>${S.wsOk?'LIVE WS':'REST POLL'}</span></div>
+  <div class="price-hero">
+    <div class="ph-price" style="color:${up?'#059669':'#dc2626'}">${p?fmtP(p):'---'}</div>
+    <div style="margin-top:4px">
+      <span class="ph-tag ${S.change24h>=0?'g':'r'}">${S.change24h>=0?'+':''}${fmt(S.change24h,2)}%</span>
+    </div>
+    <div style="font-size:9px;color:#9ca3af;margin-top:4px">${S.lastUpdate?'Updated '+S.lastUpdate:''}</div>
+  </div>
+  <div class="row"><span>24h High</span><span class="val gold">${S.high24h?fmtP(S.high24h):'---'}</span></div>
+  <div class="row"><span>24h Low</span><span class="val r">${S.low24h?fmtP(S.low24h):'---'}</span></div>
+  <div class="row"><span>Kalman Estimate</span><span class="val b">${ind.kfPrice?fmtP(ind.kfPrice):'---'}</span></div>
+  <div class="row"><span>Regime</span><span class="val o">${S.regime}</span></div>
+  <div style="margin:8px 0 4px;display:flex;gap:4px;flex-wrap:wrap">
+    ${['1m','5m','15m','1h','4h','1d'].map(tf=>`<button class="btn-tf ${S.tf===tf?'on':''}" onclick="setTf('${tf}')">${tf}</button>`).join('')}
+  </div>
+  <button id="runBtn" ${S.loading?'disabled':''} onclick="runAnalysis()">${S.loading?'⟳ TRAINING ML...':'▶ RUN FULL ANALYSIS'}</button>
+</div>
+
+<!-- CARD 2: ENSEMBLE SIGNAL -->
+<div class="card">
+  <div class="header">ENSEMBLE ML SIGNAL <span class="header-sub">RF+GB+KF+RL</span></div>
+  <div class="signal-box ${sigClass}">${sig.label} &nbsp;${sig.conf.toFixed(0)}%</div>
+  <div class="conf-bar"><div class="conf-fill" style="width:${sig.conf}%;background:${sig.label==='BUY'?'#059669':sig.label==='SELL'?'#dc2626':'#d97706'}"></div></div>
+  <div class="tp-sl-box">
+    <div class="tp-box">TP<br>${sig.tp?fmtP(sig.tp):'---'}</div>
+    <div class="sl-box">SL<br>${sig.sl?fmtP(sig.sl):'---'}</div>
+  </div>
+  <div class="row" style="margin-top:6px"><span>Entry</span><span class="val">${sig.entry?fmtP(sig.entry):'---'}</span></div>
+  <div class="row"><span>Risk : Reward</span><span class="val ${sig.rr>=2?'g':sig.rr>=1.5?'o':'r'}">1 : ${sig.rr.toFixed(2)}</span></div>
+  <div class="row"><span>Regime Context</span><span class="val o">${S.regime}</span></div>
+  <div class="ind-row">
+    <span class="ind rsi">RSI ${fmt(ind.rsi,1)}</span>
+    <span class="ind macd">MACD ${ind.macdHist>0?'+':''}${fmt(ind.macdHist,3)}</span>
+    <span class="ind bb">BB ${ind.bb?(((S.price-ind.bb.lower)/(ind.bb.upper-ind.bb.lower||1))*100).toFixed(0)+'%':'--'}</span>
+    <span class="ind atr">ATR ${fmt(ind.atr,2)}</span>
+    <span class="ind ema">EMA9 ${ind.ema9?fmtP(ind.ema9):'--'}</span>
+    <span class="ind kf">KF ${fmt((S.price-ind.kfPrice)/ind.kfPrice*100,3)}%</span>
+  </div>
+</div>
+
+<!-- CARD 3: CHART -->
+<div class="card wide">
+  <div class="header">CANDLESTICK · XAU/USD · ${S.tf} <span class="header-sub">EMA9 EMA21 Bollinger Bands</span></div>
+  <canvas id="mainChart" style="height:200px;background:#fafafa;border-radius:3px"></canvas>
+</div>
+
+<!-- CARD 4: ALGO BREAKDOWN -->
+<div class="card">
+  <div class="header">ALGORITHM BREAKDOWN <span class="header-sub">4-layer ensemble</span></div>
+  ${[
+    {name:'Random Forest (20 trees)',label:ml.rf.label,conf:ml.rf.conf,col:'#1d4ed8'},
+    {name:'Gradient Boosting (SAMME)',label:ml.gb.label,conf:ml.gb.conf,col:'#7c3aed'},
+    {name:'Kalman Filter (UKF-est.)',label:ml.kf.label,conf:ml.kf.conf,col:'#059669'},
+    {name:'Q-Learning (RL)',label:ml.rl.label,conf:50,col:'#d97706'},
+  ].map(a=>`
+    <div class="algo-row">
+      <span class="algo-name">${a.name}</span>
+      <span class="algo-val" style="color:${a.label==='BUY'?'#059669':a.label==='SELL'?'#dc2626':'#9ca3af'}">${a.label}</span>
+    </div>
+    <div class="vote-bar"><div class="vote-fill" style="width:${a.conf}%;background:${a.col}"></div></div>
+  `).join('')}
+  <div style="margin-top:8px">
+    <div class="row"><span>Ensemble Confidence</span><span class="val">${fmt(sig.conf,1)}%</span></div>
+    <div class="row"><span>RF Val. Accuracy</span><span class="val g">${fmt(algo.rfAcc,1)}%</span></div>
+    <div class="row"><span>GB Val. Accuracy</span><span class="val b">${fmt(algo.gbAcc,1)}%</span></div>
+    <div class="row"><span>Training Samples</span><span class="val">${algo.samples||0}</span></div>
+    <div class="row"><span>Train Time</span><span class="val">${fmt(algo.trainMs,0)}ms</span></div>
+    <div class="row"><span>RL Episodes</span><span class="val o">${S.rl.episodes}</span></div>
+  </div>
+</div>
+
+<!-- CARD 5: RL STATE -->
+<div class="card">
+  <div class="header">REINFORCEMENT LEARNING <span class="header-sub">Q-Table state machine</span></div>
+  <div class="grid2" style="margin-bottom:8px">
+    <div class="metric-card"><div class="metric-val" style="color:#d97706;font-size:14px">${ml.rl.label}</div><div class="metric-lbl">RL Action</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:14px">${ml.rl.q||'0.000'}</div><div class="metric-lbl">Q-Value</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:14px">${S.rl.episodes}</div><div class="metric-lbl">Episodes</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:14px">${fmt(S.rl.reward,3)}</div><div class="metric-lbl">Avg Reward</div></div>
+  </div>
+  <div class="section-label">Current Market State</div>
+  <div class="rl-state">
+    <span class="rl-chip ${ind.rsi<35?'buy':ind.rsi>65?'sell':'hold'}">RSI:${ind.rsi<35?'OS':ind.rsi>65?'OB':'N'}</span>
+    <span class="rl-chip ${ind.macdHist>0.1?'buy':ind.macdHist<-0.1?'sell':'hold'}">MACD:${ind.macdHist>0.1?'UP':ind.macdHist<-0.1?'DN':'N'}</span>
+    <span class="rl-chip ${(ind.bb&&S.price<ind.bb.lower)?'buy':(ind.bb&&S.price>ind.bb.upper)?'sell':'hold'}">BB:${(ind.bb&&S.price<ind.bb.lower)?'LOW':(ind.bb&&S.price>ind.bb.upper)?'HIGH':'MID'}</span>
+  </div>
+  <div class="row"><span>State Key</span><span class="val" style="font-size:9px">${S.rl.state||'---'}</span></div>
+  <div class="row"><span>Explore Rate (ε)</span><span class="val">${(S.rl.epsilon*100).toFixed(0)}%</span></div>
+  <div class="row"><span>Learning Rate (α)</span><span class="val">${S.rl.alpha}</span></div>
+  <div class="row"><span>Discount (γ)</span><span class="val">${S.rl.gamma}</span></div>
+  <div class="row"><span>K-Means Regime</span><span class="val o">${S.regime}</span></div>
+</div>
+
+<!-- CARD 6: FEATURE IMPORTANCE -->
+<div class="card">
+  <div class="header">FEATURE IMPORTANCE <span class="header-sub">RF permutation</span></div>
+  ${algo.features.length?algo.features.map(f=>`
+    <div style="margin-bottom:6px">
+      <div class="row" style="padding:2px 0"><span>${f.name}</span><span class="val">${fmt(f.imp,1)}%</span></div>
+      <div class="progress"><div class="pf" style="width:${Math.min(f.imp*5,100)}%;background:#c8102e"></div></div>
+    </div>
+  `).join(''):`<div class="row" style="color:#9ca3af">Run analysis to compute importance</div>`}
+  <div class="section-label" style="margin-top:8px">Active Algorithms</div>
+  <div>
+    <span class="badge active">Random Forest</span>
+    <span class="badge active">Gradient Boosting</span>
+    <span class="badge active">K-Means Regime</span>
+    <span class="badge active">Kalman Filter</span>
+    <span class="badge active">Q-Learning RL</span>
+    <span class="badge ${S.ready?'active':''}">Volume Profile</span>
+    <span class="badge ${S.ready?'active':''}">Pivot S/R</span>
+    <span class="badge ${S.loading?'training':''}">Bollinger Bands</span>
+  </div>
+</div>
+
+<!-- CARD 7: LIQUIDITY ZONES -->
+<div class="card">
+  <div class="header">LIQUIDITY ZONES <span class="header-sub">volume profile + ML clusters</span></div>
+  ${S.zones.length?S.zones.slice(0,8).map(z=>`
+    <div class="zone ${z.type==='RESISTANCE'?'res':z.type==='SUPPORT'?'sup':z.type==='LIQUIDITY'?'liq':'ml'}">
+      <span>${z.type}</span>
+      <span style="font-weight:700">${fmtP(z.price)}</span>
+      <span style="color:#9ca3af">${z.strength?fmt(z.strength,0)+'%':''}</span>
+    </div>
+  `).join(''):`<div class="row" style="color:#9ca3af">Run analysis to detect zones</div>`}
+</div>
+
+<!-- CARD 8: S/R LEVELS -->
+<div class="card">
+  <div class="header">SUPPORT & RESISTANCE <span class="header-sub">pivot cluster algorithm</span></div>
+  ${S.sr.length?S.sr.slice(0,8).map(z=>`
+    <div class="zone ${z.type==='RESISTANCE'?'res':'sup'}">
+      <span>${z.type}</span>
+      <span style="font-weight:700">${fmtP(z.price)}</span>
+      <span style="color:${z.price>(S.price||0)?'#dc2626':'#059669'}">${z.price>(S.price||0)?'▲ ABOVE':'▼ BELOW'}</span>
+    </div>
+  `).join(''):`<div class="row" style="color:#9ca3af">Run analysis to compute levels</div>`}
+</div>
+
+<!-- CARD 9: INDICATORS -->
+<div class="card">
+  <div class="header">TECHNICAL INDICATORS</div>
+  <div class="grid2">
+    <div class="metric-card"><div class="metric-val" style="color:${ind.rsi<30?'#059669':ind.rsi>70?'#dc2626':'#374151'}">${fmt(ind.rsi,1)}</div><div class="metric-lbl">RSI(14)</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:${ind.macdHist>=0?'#059669':'#dc2626'}">${fmt(ind.macdHist,3)}</div><div class="metric-lbl">MACD Hist</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:#b45309">${fmt(ind.atr,2)}</div><div class="metric-lbl">ATR(14)</div></div>
+    <div class="metric-card"><div class="metric-val" style="color:${ind.adx>25?'#059669':'#9ca3af'}">${fmt(ind.adx,1)}</div><div class="metric-lbl">ADX(14)</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:13px;color:${ind.stoch<20?'#059669':ind.stoch>80?'#dc2626':'#374151'}">${fmt(ind.stoch,1)}</div><div class="metric-lbl">Stoch(14)</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:13px">${ind.ema9?fmtP(ind.ema9):'--'}</div><div class="metric-lbl">EMA(9)</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:13px">${ind.ema21?fmtP(ind.ema21):'--'}</div><div class="metric-lbl">EMA(21)</div></div>
+    <div class="metric-card"><div class="metric-val" style="font-size:13px">${ind.ema50?fmtP(ind.ema50):'--'}</div><div class="metric-lbl">EMA(50)</div></div>
+  </div>
+  <div style="margin-top:8px">
+    <div class="row"><span>BB Upper</span><span class="val r">${ind.bb?fmtP(ind.bb.upper):'--'}</span></div>
+    <div class="row"><span>BB Mid</span><span class="val">${ind.bb?fmtP(ind.bb.mid):'--'}</span></div>
+    <div class="row"><span>BB Lower</span><span class="val g">${ind.bb?fmtP(ind.bb.lower):'--'}</span></div>
+  </div>
+</div>
+
+<!-- CARD 10: LOG -->
+<div class="card wide">
+  <div class="header">ACTIVITY LOG <span class="header-sub">${S.logs.length} entries</span></div>
+  <div style="max-height:180px;overflow-y:auto">
+    ${S.logs.slice(0,30).map(l=>`
+      <div class="log-entry">
+        <span class="log-time">${l.ts}</span>
+        <span class="log-tag ${l.tag}">${l.tag}</span>
+        <span class="log-msg">${l.msg}</span>
+      </div>
+    `).join('')||'<div class="log-entry"><span class="log-msg" style="color:#9ca3af">No activity yet — run analysis to start.</span></div>'}
+  </div>
+</div>
+
+</div>`;
+
+  // Bind globals
+  window.runAnalysis=runAnalysis;
+  window.setTf=setTf;
+
+  // Draw chart after DOM render
+  requestAnimationFrame(()=>drawChart('mainChart'));
+}
+
+/* ──────────────────────── BOOT ──────────────────────── */
+listeners.push(render);
+render();
+setTimeout(runAnalysis,100);
+
+// Auto-refresh price every 30s if no WS
+setInterval(async()=>{
+  if(S.wsOk||S.loading)return;
+  const p=await fetchTicker();
+  if(p){S.prevPrice=S.price;S.price=p;S.lastUpdate=ts();render();}
+},30000);
+
+// Auto re-analyze every 15min
+setInterval(()=>{if(!S.loading&&S.ready&&S.autoAnalyze)runAnalysis();},15*60*1000);
+
+})();
+</script>
+</body>
+</html>
